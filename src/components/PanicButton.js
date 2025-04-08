@@ -49,7 +49,7 @@ function PanicButton() {
       userName: 'Usuário Teste',
     };
 
-    const socket = io('https://seu-backend.onrender.com');
+    const socket = io('https://botaopanico-backend.onrender.com');
     socket.emit('panicAlert', alert);
     setOpenAlert(true);
   };
