@@ -36,8 +36,8 @@ const MapWrapper = styled('div')({
 function MonitoringPage() {
   const [alerts, setAlerts] = useState([]);
   const [center, setCenter] = useState({
-    lat: -23.550520,
-    lng: -46.633308
+    lat: -22.9068, // Coordenadas do Brasil (mais centralizadas)
+    lng: -43.1729
   });
 
   useEffect(() => {
@@ -86,7 +86,11 @@ function MonitoringPage() {
               Localização dos Alertas
             </Typography>
             <MapWrapper>
-              <MapContainer center={[center.lat, center.lng]} zoom={13}>
+              <MapContainer 
+                center={[center.lat, center.lng]} 
+                zoom={15}  // Aumentado o zoom para melhor visualização
+                key={`${center.lat}-${center.lng}`} // Força atualização quando o centro muda
+              >
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
