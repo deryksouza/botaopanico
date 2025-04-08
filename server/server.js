@@ -5,6 +5,7 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -16,7 +17,7 @@ const io = new Server(server, {
 const port = process.env.PORT || 3001;
 
 io.on('connection', (socket) => {
-  console.log('Dispositivo conectado');
+  console.log('Cliente conectado');
 
   socket.on('panicAlert', (data) => {
     console.log('Alerta recebido:', data);
@@ -24,6 +25,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(port, '0.0.0.0', () => {
+server.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
 });
