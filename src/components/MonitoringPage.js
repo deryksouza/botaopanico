@@ -23,7 +23,8 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   marginTop: theme.spacing(3),
 }));
 
-const MapContainer = styled('div')({
+// Rename this to avoid conflict with react-leaflet's MapContainer
+const MapWrapper = styled('div')({
   height: '400px',
   width: '100%',
   '& .leaflet-container': {
