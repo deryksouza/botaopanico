@@ -1,84 +1,111 @@
 import React, { useState, useEffect } from 'react';
-import { styled } from '@mui/material/styles';
-import { Button, Container, Paper, Typography, Snackbar, Alert } from '@mui/material';
-import ErrorIcon from '@mui/icons-material/Error';
+import { styled, keyframes } from '@mui/material/styles';
+import { Button, Container, Typography } from '@mui/material';
 import io from 'socket.io-client';
 
-const StyledContainer = styled(Container)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  textAlign: 'center',
-}));
+const pulse = keyframes`
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 20px rgba(255, 0, 0, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+  }
+`;
 
-const StyledButton = styled(Button)(({ theme }) => ({
-  width: 200,
-  height: 200,
+const EmergencyButton = styled(Button)(({ theme }) => ({
+  width: '200px',
+  height: '200px',
   borderRadius: '50%',
-  fontSize: '1.5rem',
-  marginTop: theme.spacing(4),
+  backgroundColor: '#ff0000',
+  color: 'white',
+  fontSize: '24px',
+  fontWeight: 'bold',
+  '&:hover': {
+    backgroundColor: '#cc0000',
+  },
+  animation: `${pulse} 2s infinite`,
+  boxShadow: '0 0 0 0 rgba(255, 0, 0, 1)',
+  transition: 'all 0.3s ease',
+  position: 'relative',
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    borderRadius: '50%',
+    animation: `${pulse} 2s infinite`,
+  }
 }));
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  marginTop: theme.spacing(3),
-}));
+const CenteredContainer = styled(Container)({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '100vh',
+  backgroundColor: '#f5f5f5',
+});
 
 function PanicButton() {
   const [location, setLocation] = useState(null);
-  const [openAlert, setOpenAlert] = useState(false);
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
+    const serverUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://botaopanico-backend.onrender.com'
+      : 'http://localhost:3001';
+    
+    const newSocket = io(serverUrl);
+    setSocket(newSocket);
+    return () => newSocket.disconnect();
+  }, []);
+
+  const handleEmergency = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
+          const { latitude, longitude } = position.coords;
+          setLocation({ latitude, longitude });
+          
+          if (socket) {
+            socket.emit('panicAlert', {
+              userName: localStorage.getItem('username') || 'Usuário',
+              timestamp: new Date(),
+              location: { latitude, longitude }
+            });
+          }
         },
         (error) => {
           console.error('Erro ao obter localização:', error);
+          if (socket) {
+            socket.emit('panicAlert', {
+              userName: localStorage.getItem('username') || 'Usuário',
+              timestamp: new Date(),
+            });
+          }
         }
       );
     }
-  }, []);
-
-  const handlePanic = () => {
-    const alert = {
-      timestamp: new Date().toISOString(),
-      location: location,
-      userName: 'Usuário Teste',
-    };
-
-    const socket = io('https://botaopanico-backend.onrender.com');
-    socket.emit('panicAlert', alert);
-    setOpenAlert(true);
   };
 
   return (
-    <StyledContainer>
+    <CenteredContainer>
       <Typography variant="h4" gutterBottom>
-        Sistema de Emergência
+        Botão de Emergência
       </Typography>
-      <StyledButton
+      <EmergencyButton
         variant="contained"
-        color="secondary"
-        onClick={handlePanic}
-        startIcon={<ErrorIcon />}
+        onClick={handleEmergency}
       >
         EMERGÊNCIA
-      </StyledButton>
-      <StyledPaper>
-        <Typography variant="body1">
-          Em caso de emergência, pressione o botão acima ou diga "EMERGÊNCIA"
-        </Typography>
-      </StyledPaper>
-
-      <Snackbar open={openAlert} autoHideDuration={6000} onClose={() => setOpenAlert(false)}>
-        <Alert severity="error" onClose={() => setOpenAlert(false)}>
-          Alerta de emergência enviado! A equipe de segurança foi notificada.
-        </Alert>
-      </Snackbar>
-    </StyledContainer>
+      </EmergencyButton>
+    </CenteredContainer>
   );
 }
 

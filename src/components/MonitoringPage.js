@@ -36,12 +36,12 @@ const MapWrapper = styled('div')({
 function MonitoringPage() {
   const [alerts, setAlerts] = useState([]);
   const [center, setCenter] = useState({
-    lat: -22.9068, // Coordenadas do Brasil (mais centralizadas)
-    lng: -43.1729
+    lat: -3.7319, // Coordenadas de Fortaleza
+    lng: -38.5267
   });
 
   useEffect(() => {
-    const socket = io('https://botaopanico-backend.onrender.com');
+    const socket = io('http://localhost:3001');  // Atualizando para o servidor local
 
     socket.on('newAlert', (data) => {
       setAlerts(prevAlerts => [...prevAlerts, data]);
