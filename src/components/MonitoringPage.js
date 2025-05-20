@@ -35,6 +35,46 @@ const MapWrapper = styled('div')({
 
 function MonitoringPage() {
   const [alerts, setAlerts] = useState([]);
+  const [socket, setSocket] = useState(null);
+  const [center, setCenter] = useState({
+    lat: -3.7319,
+    lng: -38.5267
+  });
+
+  useEffect(() => {
+    const serverUrl = 'https://botaopanico-backend.onrender.com';
+    console.log('Monitor conectando ao servidor:', serverUrl);
+    
+    const newSocket = io(serverUrl, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
+    });
+    
+    newSocket.on('connect', () => {
+      console.log('Monitor conectado - ID:', newSocket.id);
+    });
+
+    newSocket.on('newAlert', (data) => {
+      console.log('Novo alerta recebido no monitor:', data);
+      setAlerts(prevAlerts => [...prevAlerts, data]);
+      if (data.location) {
+        setCenter({
+          lat: data.location.latitude,
+          lng: data.location.longitude
+        });
+      }
+    });
+    
+    newSocket.on('connect_error', (error) => {
+      console.error('Erro na conexão do monitor:', error.message);
+    });
+    
+    setSocket(newSocket);
+    return () => newSocket.disconnect();
+  }, []);
+
   const [center, setCenter] = useState({
     lat: -3.7319, // Coordenadas de Fortaleza
     lng: -38.5267
