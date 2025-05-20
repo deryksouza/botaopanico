@@ -10,8 +10,8 @@ app.use(cors({
   methods: ['GET', 'POST']
 }));
 
-// Servir arquivos estáticos do build
-app.use(express.static(path.join(__dirname, '../build')));
+// Ajustando o caminho para o build
+app.use(express.static('build'));
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -32,9 +32,9 @@ io.on('connection', (socket) => {
   });
 });
 
-// Rota para todas as requisições
+// Atualizando a rota para usar caminho relativo
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../build/index.html'));
+  res.sendFile(path.join(__dirname, '..', 'build', 'index.html'));
 });
 
 server.listen(port, () => {
