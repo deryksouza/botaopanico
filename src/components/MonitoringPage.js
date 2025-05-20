@@ -37,7 +37,7 @@ function MonitoringPage() {
   const [alerts, setAlerts] = useState([]);
   const [socket, setSocket] = useState(null);
   const [center, setCenter] = useState({
-    lat: -3.7319,
+    lat: -3.7319, // Coordenadas de Fortaleza
     lng: -38.5267
   });
 
@@ -75,26 +75,7 @@ function MonitoringPage() {
     return () => newSocket.disconnect();
   }, []);
 
-  const [center, setCenter] = useState({
-    lat: -3.7319, // Coordenadas de Fortaleza
-    lng: -38.5267
-  });
-
-  useEffect(() => {
-    const socket = io('http://localhost:3001');  // Atualizando para o servidor local
-
-    socket.on('newAlert', (data) => {
-      setAlerts(prevAlerts => [...prevAlerts, data]);
-      if (data.location) {
-        setCenter({
-          lat: data.location.latitude,
-          lng: data.location.longitude
-        });
-      }
-    });
-
-    return () => socket.disconnect();
-  }, []);
+  // Removido a segunda declaração de center/setCenter e o segundo useEffect
 
   return (
     <StyledContainer>
