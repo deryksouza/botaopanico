@@ -55,21 +55,32 @@ const CenteredContainer = styled(Container)({
 function PanicButton() {
   const [location, setLocation] = useState(null);
   const [socket, setSocket] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Verificando a URL do servidor
     const serverUrl = 'https://botaopanico-backend.onrender.com';
-    console.log('Conectando ao servidor:', serverUrl);
+    console.log('Tentando conectar ao servidor:', serverUrl);
     
-    const newSocket = io(serverUrl);
+    const newSocket = io(serverUrl, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
+    });
     
-    // Adicionando listeners para debug
     newSocket.on('connect', () => {
-      console.log('Socket conectado com sucesso');
+      console.log('Socket conectado com sucesso - ID:', newSocket.id);
+      setIsConnected(true);
+    });
+    
+    newSocket.on('disconnect', () => {
+      console.log('Socket desconectado');
+      setIsConnected(false);
     });
     
     newSocket.on('connect_error', (error) => {
-      console.error('Erro na conexão:', error);
+      console.error('Erro na conexão:', error.message);
+      setIsConnected(false);
     });
     
     setSocket(newSocket);
