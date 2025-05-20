@@ -20,11 +20,21 @@ const io = new Server(server, {
 const port = process.env.PORT || 3001;
 
 io.on('connection', (socket) => {
-  console.log('Cliente conectado');
+  console.log('Cliente conectado - ID:', socket.id);
 
   socket.on('panicAlert', (data) => {
-    console.log('Alerta recebido:', data);
+    console.log('Alerta recebido:', {
+      socketId: socket.id,
+      userName: data.userName,
+      timestamp: data.timestamp,
+      location: data.location
+    });
     io.emit('newAlert', data);
+    console.log('Alerta enviado para todos os clientes');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Cliente desconectado - ID:', socket.id);
   });
 });
 
