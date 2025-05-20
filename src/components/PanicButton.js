@@ -57,11 +57,21 @@ function PanicButton() {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const serverUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://botaopanico-backend.onrender.com'
-      : 'http://localhost:3001';
+    // Verificando a URL do servidor
+    const serverUrl = 'https://botaopanico-backend.onrender.com';
+    console.log('Conectando ao servidor:', serverUrl);
     
     const newSocket = io(serverUrl);
+    
+    // Adicionando listeners para debug
+    newSocket.on('connect', () => {
+      console.log('Socket conectado com sucesso');
+    });
+    
+    newSocket.on('connect_error', (error) => {
+      console.error('Erro na conexão:', error);
+    });
+    
     setSocket(newSocket);
     return () => newSocket.disconnect();
   }, []);
