@@ -77,22 +77,38 @@ function PanicButton() {
   }, []);
 
   const handleEmergency = () => {
+    console.log('Botão pressionado');
     if (navigator.geolocation) {
+      console.log('Geolocalização disponível, solicitando posição...');
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          console.log('Posição obtida:', position.coords);
           const { latitude, longitude } = position.coords;
           setLocation({ latitude, longitude });
           
-          if (socket) {
+          if (socket && socket.connected) {
+            console.log('Socket conectado, enviando alerta com localização:', {
+              latitude,
+              longitude,
+              socketId: socket.id
+            });
             socket.emit('panicAlert', {
               userName: localStorage.getItem('username') || 'Usuário',
-              timestamp: new Date(),
+              timestamp: new Date().toISOString(),
               location: { latitude, longitude }
+            });
+          } else {
+            console.error('Socket não está conectado!', {
+              socketExists: !!socket,
+              socketConnected: socket?.connected
             });
           }
         },
         (error) => {
-          console.error('Erro ao obter localização:', error);
+          console.error('Erro na geolocalização:', {
+            code: error.code,
+            message: error.message
+          });
           if (socket) {
             socket.emit('panicAlert', {
               userName: localStorage.getItem('username') || 'Usuário',
@@ -101,6 +117,8 @@ function PanicButton() {
           }
         }
       );
+    } else {
+      console.error('Geolocalização não suportada neste navegador');
     }
   };
 
