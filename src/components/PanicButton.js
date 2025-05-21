@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { styled, keyframes } from '@mui/material/styles';
 import { Button, Container, Typography } from '@mui/material';
 import io from 'socket.io-client';
+import { AppBar, Tabs, Tab, Box } from '@mui/material';
+import UserProfile from './UserProfile';
 
 const pulse = keyframes`
   0% {
@@ -52,10 +54,19 @@ const CenteredContainer = styled(Container)({
   backgroundColor: '#f5f5f5',
 });
 
+function TabPanel({ children, value, index }) {
+  return (
+    <div hidden={value !== index} style={{ width: '100%' }}>
+      {value === index && <Box>{children}</Box>}
+    </div>
+  );
+}
+
 function PanicButton() {
   const [location, setLocation] = useState(null);
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     const serverUrl = 'https://botaopanico-backend.onrender.com';
@@ -134,17 +145,34 @@ function PanicButton() {
   };
 
   return (
-    <CenteredContainer>
-      <Typography variant="h4" gutterBottom>
-        Botão de Emergência
-      </Typography>
-      <EmergencyButton
-        variant="contained"
-        onClick={handleEmergency}
-      >
-        EMERGÊNCIA
-      </EmergencyButton>
-    </CenteredContainer>
+    <>
+      <AppBar position="static">
+        <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)}>
+          <Tab label="Início" />
+          <Tab label="Usuário" />
+        </Tabs>
+      </AppBar>
+
+      <TabPanel value={tabValue} index={0}>
+        <CenteredContainer>
+          <Typography variant="h4" gutterBottom>
+            Botão de Emergência
+          </Typography>
+          <EmergencyButton
+            variant="contained"
+            onClick={handleEmergency}
+          >
+            EMERGÊNCIA
+          </EmergencyButton>
+        </CenteredContainer>
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={1}>
+        <CenteredContainer>
+          <UserProfile />
+        </CenteredContainer>
+      </TabPanel>
+    </>
   );
 }
 
