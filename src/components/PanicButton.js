@@ -59,7 +59,7 @@ function PanicButton() {
 
   useEffect(() => {
     const serverUrl = 'https://botaopanico-backend.onrender.com';
-    console.log('Tentando conectar ao servidor:', serverUrl);
+    console.log('Conectando ao servidor:', serverUrl);
     
     const newSocket = io(serverUrl, {
       transports: ['websocket', 'polling'],
